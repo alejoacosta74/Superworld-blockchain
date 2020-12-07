@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.6.0;   
+pragma solidity ^0.6.0;
 
 // 0x0A7a9dd62Af0638DE94903235682d1630DF09Cf3 use for ropsten coin
 // rinkeby 0x22E94603d5143db30b41653A0b96EEF1eAAaf051
@@ -53,14 +53,14 @@ contract SuperWorldToken is ERC721, Ownable {
     mapping(uint256 => bool) public isSellings;
     // tokenId => buyId
     mapping(uint256 => uint256) public buyIds;
-    
+
     // events
     // TODO: add timestamp (block or UTC)
-    
+
     /*
     THE EVENTS ARE EMBEDDED IN FUNCTIONS, AND ALWAYS LOG TO THE BLOCKCHAIN USING THE PARAMS SENT IN
     */
-    
+
     // @dev logs and saves the params EventBuyToken to the blockchain on a block
     // @param takes in a buyId, the geolocation, the address of the buyer and the seller, the price bought at,
     //        the time bought, and id of the property bought.
@@ -74,7 +74,7 @@ contract SuperWorldToken is ERC721, Ownable {
         uint256 timestamp,
         bytes32 indexed tokenId
     );
-    
+
     // @dev logs and saves the params of EventBuyTokenNearby, specified for buying a token nearby based on the area
     // @param takes in a buyer id, and the id of the token, as well as the geolocation, the address of buyer and seller,
     //        as well as the price of token and when the token was bought.
@@ -88,7 +88,7 @@ contract SuperWorldToken is ERC721, Ownable {
         uint256 price,
         uint256 timestamp
     );
-    
+
     // @dev lists the token on the blockchain and saves/logs the params of the token.
     // @param takes in the id of the list, the id of the buy, the geolocation, seller address, the price selling/sold at,
     //        whether it is up for a listing or not, when it was sold, and the tokenId.
@@ -103,7 +103,7 @@ contract SuperWorldToken is ERC721, Ownable {
         uint256 timestamp,
         bytes32 indexed tokenId
     );
-    
+
     // @dev Listing/selling the token through the event, and logging it through the blockchain
     // @param the id of the list, the id of the buy, the tokenid, the geolocation and the address of the seller,
     //        the listed price, and whether it is listed or not, and when it was sold.
@@ -118,7 +118,7 @@ contract SuperWorldToken is ERC721, Ownable {
         bool isListed,
         uint256 timestamp
     );
-    
+
     // @dev getting approval on the "event" on the real estate purchase
     // @param address of the buyer, the coins spent on it, where the coins are going, and the data for the event.
     event EventReceiveApproval(
@@ -143,7 +143,7 @@ contract SuperWorldToken is ERC721, Ownable {
         listId = 0;
         _setBaseURI(metaUrl);
     }
-    
+
     // @dev creates a base price that has to be greater than zero for the token
     // @param takes in a uint that represents the baseprice you want.
     // @return no return, mutator
@@ -162,7 +162,7 @@ contract SuperWorldToken is ERC721, Ownable {
 
     // @dev generates a new token, using recordTransactions directly below, private method
     // @param takes in a buyer address, the id of the token, and the price of the token
-    // @return returns nothing, creates a token 
+    // @return returns nothing, creates a token
     function createToken(
         address buyer,
         uint256 tokenId,
@@ -190,13 +190,13 @@ contract SuperWorldToken is ERC721, Ownable {
         if (bytes(lat).length == 0 || bytes(lon).length == 0) {
             return 0x0;
         }
-        
+
         string memory geo = string(abi.encodePacked(lat, ",", lon));
         assembly {
             tokenId := mload(add(geo, 32))
         }
     }
-    
+
     // @dev the opposite of the getTokenId, gives the lat and lon using tokenId
     // @param takes in a 32 bit tokenId object.
     // @return returns the latitude and longitude of a location
@@ -248,7 +248,7 @@ contract SuperWorldToken is ERC721, Ownable {
         isSelling = isSellings[intTokenId];
         price = getPrice(intTokenId);
     }
-    
+
     // Bulk transfer
     // @dev using lat and lon to transfer the token owner
     // @param takes in a geo location(lat and lon), as well as an owner address and the price to buy at
@@ -271,7 +271,7 @@ contract SuperWorldToken is ERC721, Ownable {
             now
         );
     }
-    
+
     // Bulk listing
     // @dev takes in the geolocation to relist the token on the market, buy selling the property
     // @param takes in a geolocation and the price sold at
@@ -283,7 +283,7 @@ contract SuperWorldToken is ERC721, Ownable {
     ) external onlyOwner() {
         uint256 tokenId = uint256(getTokenId(lat, lon));
         require(_tokenOwners.contains(tokenId));
-        
+
         isSellings[tokenId] = true;
         sellPrices[tokenId] = sellPrice;
         emitListTokenEvents(
@@ -296,7 +296,7 @@ contract SuperWorldToken is ERC721, Ownable {
             now
         );
     }
-    
+
     // @dev get approval for the transaction to go through
     // @param takes in a buyer address, a seller address, and the coins spending, as well as the data with the transaction?
     // @return returns nothing, emits a event receive approval obj, and logs it to transactions
@@ -360,7 +360,7 @@ contract SuperWorldToken is ERC721, Ownable {
         // address seller = address(0x0); // _tokenOwners[tokenId];
         return _buyToken(lat, lon, offerPrice);
     }
-    
+
     // @dev private helper function for buyToken
     // @param geoId, amount paid (in wei) when calling buyToken
     // @return whether buying was successful
@@ -369,7 +369,7 @@ contract SuperWorldToken is ERC721, Ownable {
         returns (bool)
     {
         uint256 tokenId = uint256(getTokenId(lat, lon));
-        
+
         // unique token not bought yet
         if (!_tokenOwners.contains(tokenId)) {
             require(offerPrice >= basePrice);
@@ -434,7 +434,7 @@ contract SuperWorldToken is ERC721, Ownable {
         );
         return true;
     }
-    
+
     // @dev Buy multiple tokens at once. Note that if the request is invalid or not enough ether is paid,
     //      no tokens will be bought
     // @param string of latitudes and string of longitudes, with entries delimited by semicolons
@@ -445,7 +445,7 @@ contract SuperWorldToken is ERC721, Ownable {
     ) public payable returns (bool) {
         uint256 n_lat = 1;
         uint256 n_lon = 1;
-        
+
         uint256 pos;
         for (pos = indexOfChar(latList, byte(";"), 0); pos != 0; pos = indexOfChar(latList, byte(";"), pos + 1)) {
             n_lat++;
@@ -456,7 +456,7 @@ contract SuperWorldToken is ERC721, Ownable {
         require(n_lat == n_lon);
         return _bulkBuy(latList, lonList, n_lat, msg.value);
     }
-    
+
     // @dev private helper function for bulkBuy
     // @param strings of semicolon-delimited latitudes and longitudes, number of tokens to buy, amount paid (in wei)
     //        when calling bulkBuy
@@ -470,7 +470,7 @@ contract SuperWorldToken is ERC721, Ownable {
         string[] memory lat = new string[](numTokens);
         string[] memory lon = new string[](numTokens);
         uint256[] memory prices = new uint256[](numTokens);
-        
+
         uint256 totalPrice = 0;
         uint256 pos_lat = 0;
         uint256 pos_lon = 0;
@@ -478,11 +478,11 @@ contract SuperWorldToken is ERC721, Ownable {
             uint256 delim_lat = indexOfChar(latList, byte(";"), pos_lat);
             lat[i] = substring(latList, pos_lat, delim_lat);
             pos_lat = delim_lat + 1;
-            
+
             uint256 delim_lon = indexOfChar(lonList, byte(";"), pos_lon);
             lon[i] = substring(lonList, pos_lon, delim_lon);
             pos_lon = delim_lon + 1;
-            
+
             uint256 tokenId = uint256(getTokenId(lat[i], lon[i]));
             prices[i] = basePrice;
             if (EnumerableMap.contains(_tokenOwners, tokenId)) {
@@ -492,7 +492,7 @@ contract SuperWorldToken is ERC721, Ownable {
             totalPrice = SafeMath.add(totalPrice, prices[i]);
         }
         require(offerPrice >= totalPrice);
-        
+
         for (uint256 i = 0; i < numTokens; i++) {
             _buyToken(lat[i], lon[i], prices[i]);
         }
@@ -617,7 +617,7 @@ contract SuperWorldToken is ERC721, Ownable {
             timestamp
         );
     }
-     
+
     // @dev provides the price for the tokenId
     // @param takes in the tokenId as a uint parameter
     // @return a uint of the price returned
@@ -630,7 +630,7 @@ contract SuperWorldToken is ERC721, Ownable {
             return isSellings[tokenId] ? sellPrices[tokenId] : boughtPrices[tokenId];
         }
     }
-    
+
     // @dev trims the decimals to a certain substring and gives it back
     // @param takes in the string, and trims based on the decimal integer
     // @return returns the substring based on the decimal values.
@@ -694,7 +694,7 @@ contract SuperWorldToken is ERC721, Ownable {
         return substring(str, index + 1, 0);
     }
 
-    
+
     // @dev converts ASCII encoding into a string
     // @param bytes32 ASCII encoding
     // @return string version
@@ -728,7 +728,7 @@ contract SuperWorldToken is ERC721, Ownable {
         uint256 balance = address(this).balance;
         (msg.sender).transfer(balance);
     }
-    
+
     // @devs: Converts a number to a string literal of its hex representation (without the '0x' prefix)
     // @param a number
     // @return string literal of the number's hex
@@ -758,7 +758,7 @@ contract SuperWorldToken is ERC721, Ownable {
         }
         return string(buffer);
     }
-    
+
     // @devs: gets the metadata URL for a token.
     // @param tokenId
     // @return string containing the URL where the token's metadata is stored
@@ -766,4 +766,46 @@ contract SuperWorldToken is ERC721, Ownable {
         string memory x = string(abi.encodePacked(metaUrl, '0x', toHexString(tokenId)));
         return x;
     }
+
+    // @devs: transfers token from original owner to new owner.
+    // @param origOwner, newOwner, tokenId
+    // @return bool
+    function transferGiftToken(address originalOwner, address newOwner, uint256 tokenId)
+    public
+    onlyOwner()
+    returns (bool)
+    {
+        string memory lat;
+        string memory lon;
+        (lat, lon) = getGeoFromTokenId(bytes32(tokenId));
+        _holderTokens[originalOwner].remove(tokenId);
+        _holderTokens[newOwner].add(tokenId);
+        _tokenOwners.set(tokenId, newOwner);
+
+        uint256 offerPrice = boughtPrices[tokenId];
+
+        // send percentage of cut to contract owner
+        uint256 fee = SafeMath.div(
+            SafeMath.mul(offerPrice, percentageCut),
+            100
+        );
+
+        uint256 priceAfterFee = SafeMath.sub(offerPrice, fee);
+
+
+        emitListTokenEvents(
+            buyIds[tokenId],
+            lon,
+            lat,
+            originalOwner,
+//            sellPrice,
+            offerPrice,
+            true,
+            now
+        );
+
+        return true;
+    }
+
+
 }
